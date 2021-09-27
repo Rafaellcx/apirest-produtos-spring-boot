@@ -1,13 +1,16 @@
 package com.produtos.apirest.resources;
 
 import com.produtos.apirest.models.Produto;
-import com.produtos.apirest.repository.ProdutoRepository;
+import com.produtos.apirest.service.ProdutoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -16,35 +19,43 @@ import java.util.List;
 public class ProdutoResource {
 
     @Autowired
-    ProdutoRepository produtoRepository;
+    private ProdutoService service;
 
     @GetMapping("/produtos")
     @ApiOperation(value = "Retorna uma lista de Produtos")
     public List<Produto> listaProdutos(){
-        return produtoRepository.findAll();
+        return service.findAll();
     }
 
     @GetMapping("/produto/{id}")
     @ApiOperation(value = "Retorna um produto único")
-    public Produto listaProdutoUnico(@PathVariable(value = "id") long id){
-        return produtoRepository.findById(id);
+    public ResponseEntity<Produto> listaProdutoUnico(@PathVariable(value = "id") long id){
+        final Produto produto = service.findById(id);
+
+        return ResponseEntity.ok(produto);
     }
 
     @PostMapping("/produto")
+    @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Salva um produto")
     public Produto salvaProduto(@RequestBody Produto produto) {
-        return produtoRepository.save(produto);
+
+        return service.save(produto);
     }
 
-    @DeleteMapping("/produto")
-    @ApiOperation(value = "Deleta um produto")
-    public void deletaProduto(@RequestBody Produto produto) {
-        produtoRepository.delete(produto);
-    }
-
-    @PutMapping("/produto")
+    @PutMapping("/produto/{id}")
     @ApiOperation(value = "Atualiza um produto")
-    public Produto atualizaProduto(@RequestBody Produto produto) {
-        return produtoRepository.save(produto);
+    public ResponseEntity<Produto> atualizaProduto(@PathVariable(value = "id") long id, @RequestBody Produto dto) {
+        final Produto produto = service.update(id, dto);
+        return ResponseEntity.ok(produto);
     }
+
+    @DeleteMapping("/produto/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "Deleta um produto")
+    public void deletaProduto(@PathVariable(value = "id") long id) {
+        service.delete(id);
+    }
+
+
 }
