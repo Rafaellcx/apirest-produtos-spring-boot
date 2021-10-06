@@ -3,6 +3,10 @@ package com.produtos.apirest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.plugin.core.SimplePluginRegistry;
 import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -48,6 +52,16 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
+    public LinkDiscoverers discovers() {
+
+        List<LinkDiscoverer> plugins = new ArrayList<>();
+        plugins.add(new CollectionJsonLinkDiscoverer());
+        return new LinkDiscoverers(SimplePluginRegistry.create(plugins));
+
+    }
+
+
 //    private List<ResponseMessage> responseMessageForGET()
 //    {
 //        return new ArrayList<ResponseMessage>() {{
@@ -63,3 +77,4 @@ public class SwaggerConfig {
 //        }};
 //    }
 }
+

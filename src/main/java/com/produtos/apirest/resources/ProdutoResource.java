@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping(value = "/api")
 @Api(value = "API REST Produtos")
@@ -23,16 +26,36 @@ public class ProdutoResource {
 
     @GetMapping("/produtos")
     @ApiOperation(value = "Retorna uma lista de Produtos")
-    public List<Produto> listaProdutos(){
-        return service.findAll();
+    public ResponseEntity<List<Produto>> listaProdutos(){
+
+        List<Produto> produtosList = service.findAll();
+        if (produtosList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            for (Produto produto : produtosList) {
+                long id = produto.getId();
+                produto.add(linkTo(methodOn(ProdutoResource.class).listaProdutoUnico(id)).withSelfRel());
+            }
+            return new ResponseEntity<List<Produto>>(produtosList, HttpStatus.OK);
+        }
+
+//        List<Produto> produtosList = service.findAll();
+//        return ResponseEntity.status(HttpStatus.OK).body(produtosList);
     }
 
     @GetMapping("/produto/{id}")
     @ApiOperation(value = "Retorna um produto único")
     public ResponseEntity<Produto> listaProdutoUnico(@PathVariable(value = "id") long id){
-        final Produto produto = service.findById(id);
-
-        return ResponseEntity.ok(produto);
+        Optional<Produto> produto = Optional.ofNullable(service.findById(id));
+        if (!produto.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            produto.get().add(linkTo(methodOn(ProdutoResource.class).listaProdutos()).withRel("Lista de Produtos"));
+            return new ResponseEntity<Produto>(produto.get(), HttpStatus.OK);
+        }
+//        final Produto produto = service.findById(id);
+//
+//        return ResponseEntity.ok(produto);
     }
 
     @PostMapping("/produto")
@@ -41,6 +64,8 @@ public class ProdutoResource {
     public Produto salvaProduto(@RequestBody Produto produto) {
 
         return service.save(produto);
+
+//        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/produto/{id}")

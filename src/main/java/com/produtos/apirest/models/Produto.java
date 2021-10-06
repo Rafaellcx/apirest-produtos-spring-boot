@@ -1,5 +1,7 @@
 package com.produtos.apirest.models;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -7,7 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="TB_PRODUTO")
-public class Produto implements Serializable{
+public class Produto extends RepresentationModel<Produto> implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
